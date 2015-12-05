@@ -1,0 +1,26 @@
+Bare metal code for MIPS cpus, more specifically for the
+ci20 creator board.
+
+The code focus on interrupt & exceptions handling and, hopefully,
+ simplicity and clarity.
+
+
+Remarks:
+- the build system was heavily inspired by Linux's kbuild
+  but it also quite different (non-recursive make) and
+  much less sophisticated.
+
+/*********************************************************/
+To compile & link, a plain
+	> make
+will compile all the source code into a library: libtarget.a
+	> make dir/
+will only compile the source in the given directory,
+	> make dir/file.o
+will only compile the given file.
+	> make apps/
+will compile and link the few examples presents there. 
+
+
+Have fun.
+Luc Van Oostenryck
