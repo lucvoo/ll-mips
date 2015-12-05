@@ -1,0 +1,22 @@
+CROSS_COMPILE	?= mips-none-elf-
+
+ld-emul-$(CONFIG_ENDIAN_BIG)		+= eb
+ld-emul-$(CONFIG_ENDIAN_LITTLE)		+= el
+
+LDFLAGS-y += -Wl,-m,elf$(CONFIG_BITS)$(ld-emul-y)mip
+LDFLAGS-$(CONFIG_ENDIAN_BIG)		+= -Wl,-EB
+LDFLAGS-$(CONFIG_ENDIAN_LITTLE)		+= -Wl,-EL
+
+
+ARCHFLAGS-$(CONFIG_ENDIAN_BIG)		+= -EB
+ARCHFLAGS-$(CONFIG_ENDIAN_LITTLE)	+= -EL
+
+ARCHFLAGS-$(CONFIG_CPU_MIPS32)		+= -march=mips32
+ARCHFLAGS-$(CONFIG_CPU_MIPS32R2)	+= -march=mips32r2
+ARCHFLAGS-y				+= -mno-abicalls
+ARCHFLAGS-y				+= -G 0  -mno-gpopt
+ARCHFLAGS-y				+= -fno-pic
+ARCHFLAGS-y				+= -fno-common
+
+ARCHFLAGS-$(CONFIG_ABI_EABI)		+= -mabi=eabi
+ARCHFLAGS-$(CONFIG_ABI_EABI)		+= -msoft-float -Wa,-msoft-float

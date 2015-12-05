@@ -1,0 +1,58 @@
+include include/config
+
+depfile = $(dir $@).$(notdir $@).d
+gendeps = -Wp,-MD,$(depfile) -Wp,-MT,$(dir $@)$@
+p_flags = $(gendeps) $(PFLAGS) $(PFLAGS-y)
+c_flags	= $(p_flags) $(CFLAGS) $(CFLAGS-y)
+a_flags	= $(p_flags) $(AFLAGS) $(AFLAGS-y)
+
+# C sources
+# ---------------------------------------------------------------------------
+
+%.s: %.c
+	@echo "CC	$@"
+	$(Q)$(CC) $(c_flags) -fverbose-asm -S -o $@ $<
+
+%.i: %.c FORCE
+	@echo "CPP	$@"
+	$(Q)$(CPP) $(c_flags) -dD -o $@ $<
+	$(Q)less $@
+
+%.o: %.c
+	@echo "CC	$@"
+	$(Q)$(CC) $(c_flags) -c -o $@ $<
+
+# assembly sources
+# ---------------------------------------------------------------------------
+
+%.s: %.S FORCE
+	@echo "CPP	$@"
+	$(Q)$(CPP) $(a_flags) -dD -o $@ $<
+
+%.o: %.S
+	@echo "AS	$@"
+	$(Q)$(CC) $(a_flags) -c -o $@ $<
+
+# misc
+# ---------------------------------------------------------------------------
+%.lds: %.lds.in
+	@echo "LDS	$@"
+	$(Q)$(CPP) -x assembler-with-cpp -P -D__ASSEMBLY__ $(p_flags)   -o $@ $<
+	@sed -i 's/lds.o:/lds:/' $(depfile)
+
+%.bin: %
+	@echo "BIN	$<"
+	$(Q)$(OBJCOPY) -O binary $< $@
+
+# archive
+# ---------------------------------------------------------------------------
+%.a:
+	@echo "AR	$@"
+	@if [ -n "$(filter-out $^,$(deps_$@))" ]; then rm -f $@; fi	# rm the lib if it contains old members
+	$(Q)$(AR) crs $@ $^
+	@echo "deps_$@ := $^" > $(depfile)
+# ---------------------------------------------------------------------------
+
+.PHONY: FORCE
+
+FORCE:

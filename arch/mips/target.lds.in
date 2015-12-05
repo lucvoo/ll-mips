@@ -1,0 +1,41 @@
+#include <arch/memory.h>
+
+#define	TEXT_ALIGN	
+
+ENTRY(__startup)
+GROUP(libtarget.a libgcc.a)
+
+MEMORY {
+	ram		: ORIGIN = VIRT_ADDR + TEXT_OFFSET, LENGTH = 0xFFFFFFFF
+}
+
+SECTIONS
+{
+	.init : {
+			*(.startup.text)
+			*(.init.text)
+	} > ram
+
+	.text TEXT_ALIGN : {
+			*(.text*)
+	} > ram
+
+	.rodata : {
+			*(.rodata*)
+	} > ram
+
+	.data : {
+			*(.data*)
+	} > ram
+
+	.bss : {
+		PROVIDE(__bss_start = .);
+			*(.bss*)
+			*(COMMON)
+		PROVIDE(__bss_end = .);
+	} > ram
+
+	.uninit (NOLOAD) TEXT_ALIGN : {
+			*(SORT_BY_ALIGNMENT(.uninit*))
+	} > ram
+}
